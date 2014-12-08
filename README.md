@@ -1,3 +1,5 @@
+(Cloned from https://github.com/nebula-plugins/gradle-ospackage-plugin/tree/gradle-2.0)
+
 # Gradle Linux Packaging Plugin
 
 This plugin provides Gradle-based assembly of system packages, typically for RedHat and Debian based distributions,
