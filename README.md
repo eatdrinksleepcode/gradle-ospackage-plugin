@@ -1,4 +1,4 @@
-(Cloned from https://github.com/nebula-plugins/gradle-ospackage-plugin/tree/gradle-2.0)
+Cloned from https://github.com/nebula-plugins/gradle-ospackage-plugin/tree/gradle-2.0
 
 # Gradle Linux Packaging Plugin
 
