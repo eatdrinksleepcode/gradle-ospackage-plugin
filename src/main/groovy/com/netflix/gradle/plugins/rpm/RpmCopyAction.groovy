@@ -50,7 +50,7 @@ class RpmCopyAction extends AbstractPackagingCopyAction {
 
         assert rpmTask.getVersion() != null, "RPM requires a version string"
 
-        builder = new Builder()
+        builder = new RpmBuilder()
         builder.setPackage rpmTask.packageName, rpmTask.version, rpmTask.release
         builder.setType rpmTask.type
         builder.setPlatform rpmTask.arch, rpmTask.os
@@ -79,6 +79,7 @@ class RpmCopyAction extends AbstractPackagingCopyAction {
         builder.setPostInstallScript(scriptWithUtils(rpmTask.allCommonCommands, rpmTask.allPostInstallCommands))
         builder.setPreUninstallScript(scriptWithUtils(rpmTask.allCommonCommands, rpmTask.allPreUninstallCommands))
         builder.setPostUninstallScript(scriptWithUtils(rpmTask.allCommonCommands, rpmTask.allPostUninstallCommands))
+        builder.setVerifyScript(scriptWithUtils(rpmTask.allCommonCommands, rpmTask.allVerifyCommands))
 
         rpmFileVisitorStrategyFactory = new RpmFileVisitorStrategyFactory(builder)
     }

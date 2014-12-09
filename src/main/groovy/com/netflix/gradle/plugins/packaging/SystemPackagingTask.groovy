@@ -119,6 +119,11 @@ public abstract class SystemPackagingTask extends AbstractArchiveTask {
     }
 
     @Input @Optional
+    def getAllVerifyCommands() {
+        return getVerifyCommands() + parentExten?.getVerifyCommands()
+    }
+
+    @Input @Optional
     def getAllCommonCommands() {
         return getCommonCommands() + parentExten?.getCommonCommands()
     }

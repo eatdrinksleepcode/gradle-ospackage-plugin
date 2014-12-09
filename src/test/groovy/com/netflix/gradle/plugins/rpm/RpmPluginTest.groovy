@@ -51,6 +51,8 @@ class RpmPluginTest extends ProjectSpec {
 
         project.apply plugin: 'rpm'
 
+        def verifyScriptTag
+
         project.task([type: Rpm], 'buildRpm', {
             destinationDir = project.file('build/tmp/RpmPluginTest')
             destinationDir.mkdirs()
@@ -71,6 +73,8 @@ class RpmPluginTest extends ProjectSpec {
 
             requires('blarg', '1.0', GREATER | EQUAL)
             requires('blech')
+
+            verify 'foobar'
 
             into '/opt/bleah'
             from(srcDir)
@@ -101,6 +105,8 @@ class RpmPluginTest extends ProjectSpec {
         ['./a/path/not/to/create/alone', './opt/bleah',
                 './opt/bleah/apple', './opt/bleah/banana'] == scan.files*.name
         [FILE, DIR, FILE, SYMLINK] == scan.files*.type
+        Scanner.getHeaderEntryString(scan, RpmTag.VERIFYSCRIPT).endsWith('foobar\n')
+        Scanner.getHeaderEntryString(scan, RpmTag.VERIFYPROG) == '/bin/sh'
     }
 
     def 'obsoletesAndConflicts'() {

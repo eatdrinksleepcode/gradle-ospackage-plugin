@@ -124,6 +124,8 @@ class SystemPackagingExtension {
 
     final List<Object> postUninstallCommands = []
 
+    final List<Object> verifyCommands = []
+
     final List<Object> commonCommands = []
 
     /**
@@ -214,6 +216,17 @@ class SystemPackagingExtension {
 
     def postUninstall(File script) {
         postUninstallCommands << script
+        return this
+    }
+
+
+    def verify(String script) {
+        verifyCommands << script
+        return this
+    }
+
+    def verify(File script) {
+        verifyCommands << script
         return this
     }
 
