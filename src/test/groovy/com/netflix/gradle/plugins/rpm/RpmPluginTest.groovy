@@ -107,10 +107,6 @@ class RpmPluginTest extends ProjectSpec {
     def 'scripts'() {
         Project project = ProjectBuilder.builder().build()
 
-        File srcDir = new File(projectDir, 'src')
-        srcDir.mkdirs()
-        FileUtils.writeStringToFile(new File(srcDir, 'apple'), 'apple')
-
         project.apply plugin: 'rpm'
 
         project.task([type: Rpm], 'buildRpm', {
@@ -122,16 +118,12 @@ class RpmPluginTest extends ProjectSpec {
             release = '1'
             type = BINARY
             arch = I386
-            os = LINUX
 
             preInstall 'preInstalled'
             postInstall 'postInstalled'
             preUninstall 'preUninstalled'
             postUninstall 'postUninstalled'
             verify 'verified'
-
-            into '/opt/bleah'
-            from(srcDir)
         })
 
         when:
@@ -149,6 +141,34 @@ class RpmPluginTest extends ProjectSpec {
         Scanner.getHeaderEntryString(scan, Header.HeaderTag.POSTUNPROG) == '/bin/sh'
         Scanner.getHeaderEntryString(scan, RpmTag.VERIFYSCRIPT).endsWith('verified\n')
         Scanner.getHeaderEntryString(scan, RpmTag.VERIFYPROG) == '/bin/sh'
+    }
+
+    def 'tags'() {
+        Project project = ProjectBuilder.builder().build()
+
+        project.apply plugin: 'rpm'
+
+        def distUrlTag = new RpmTag(1123, 6, 'disturl')
+
+        project.task([type: Rpm], 'buildRpm', {
+            destinationDir = project.file('build/tmp/RpmPluginTest')
+            destinationDir.mkdirs()
+
+            packageName = 'tags'
+            version = '1.0'
+            release = '1'
+            type = BINARY
+            arch = I386
+
+            entry distUrlTag, 'foo'
+        })
+
+        when:
+        project.tasks.buildRpm.execute()
+
+        then:
+        def scan = Scanner.scan(project.file('build/tmp/RpmPluginTest/tags-1.0-1.i386.rpm'))
+        Scanner.getHeaderEntryString(scan, distUrlTag) == 'foo'
     }
 
     def 'obsoletesAndConflicts'() {

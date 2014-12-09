@@ -18,6 +18,7 @@ package com.netflix.gradle.plugins.rpm
 
 import com.netflix.gradle.plugins.packaging.AbstractPackagingCopyAction
 import com.netflix.gradle.plugins.packaging.SystemPackagingTask
+import org.freecompany.redline.header.AbstractHeader
 import org.freecompany.redline.header.Architecture
 import org.freecompany.redline.header.Os
 import org.freecompany.redline.header.RpmType
@@ -77,5 +78,13 @@ class Rpm extends SystemPackagingTask {
 
     List<String> getPrefixes() {
         exten.prefixes
+    }
+
+    def entry(AbstractHeader.Tag tag, String value) {
+        exten.entry(tag, value)
+    }
+
+    Map<AbstractHeader.Tag, String> getEntries() {
+        exten.entries
     }
 }

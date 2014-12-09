@@ -2,6 +2,7 @@ package com.netflix.gradle.plugins.packaging
 
 import com.google.common.base.Preconditions
 import com.netflix.gradle.plugins.deb.control.MultiArch
+import org.freecompany.redline.header.AbstractHeader
 import org.freecompany.redline.header.Architecture
 import org.freecompany.redline.header.Os
 import org.freecompany.redline.header.RpmType
@@ -100,6 +101,13 @@ class SystemPackagingExtension {
 
     def prefix(String prefixStr) {
         prefixes << prefixStr
+        return this
+    }
+
+    Map<AbstractHeader.Tag, String> entries = new HashMap<>()
+
+    def entry(AbstractHeader.Tag tag, String value) {
+        entries.put(tag, value)
         return this
     }
 
