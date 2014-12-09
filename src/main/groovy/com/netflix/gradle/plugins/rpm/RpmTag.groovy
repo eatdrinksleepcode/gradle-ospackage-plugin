@@ -2,10 +2,10 @@ package com.netflix.gradle.plugins.rpm
 
 import org.freecompany.redline.header.AbstractHeader
 
-enum RpmTag implements AbstractHeader.Tag {
+class RpmTag implements AbstractHeader.Tag {
 
-    VERIFYSCRIPT(1079, 6, 'verifyscript'),
-    VERIFYPROG(1091, 6, 'verifyscriptprog')
+    public static final RpmTag VERIFYSCRIPT = new RpmTag(1079, 6, 'verifyscript')
+    public static final RpmTag VERIFYPROG = new RpmTag(1091, 6, 'verifyscriptprog')
 
     private int code;
     private int type;

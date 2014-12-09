@@ -26,6 +26,7 @@ import nebula.test.dependencies.GradleDependencyGenerator
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.JavaVersion
 import org.apache.commons.lang3.SystemUtils
+import org.freecompany.redline.header.Header
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.BasePlugin
@@ -51,13 +52,11 @@ class RpmPluginTest extends ProjectSpec {
 
         project.apply plugin: 'rpm'
 
-        def verifyScriptTag
-
         project.task([type: Rpm], 'buildRpm', {
             destinationDir = project.file('build/tmp/RpmPluginTest')
             destinationDir.mkdirs()
 
-            packageName = 'bleah'
+            packageName = 'files'
             version = '1.0'
             release = '1'
             type = BINARY
@@ -73,8 +72,6 @@ class RpmPluginTest extends ProjectSpec {
 
             requires('blarg', '1.0', GREATER | EQUAL)
             requires('blech')
-
-            verify 'foobar'
 
             into '/opt/bleah'
             from(srcDir)
@@ -96,8 +93,8 @@ class RpmPluginTest extends ProjectSpec {
         project.tasks.buildRpm.execute()
 
         then:
-        def scan = Scanner.scan(project.file('build/tmp/RpmPluginTest/bleah-1.0-1.i386.rpm'))
-        'bleah' == Scanner.getHeaderEntryString(scan, NAME)
+        def scan = Scanner.scan(project.file('build/tmp/RpmPluginTest/files-1.0-1.i386.rpm'))
+        'files' == Scanner.getHeaderEntryString(scan, NAME)
         '1.0' == Scanner.getHeaderEntryString(scan, VERSION)
         '1' == Scanner.getHeaderEntryString(scan, RELEASE)
         'i386' == Scanner.getHeaderEntryString(scan, ARCH)
@@ -105,7 +102,52 @@ class RpmPluginTest extends ProjectSpec {
         ['./a/path/not/to/create/alone', './opt/bleah',
                 './opt/bleah/apple', './opt/bleah/banana'] == scan.files*.name
         [FILE, DIR, FILE, SYMLINK] == scan.files*.type
-        Scanner.getHeaderEntryString(scan, RpmTag.VERIFYSCRIPT).endsWith('foobar\n')
+    }
+
+    def 'scripts'() {
+        Project project = ProjectBuilder.builder().build()
+
+        File srcDir = new File(projectDir, 'src')
+        srcDir.mkdirs()
+        FileUtils.writeStringToFile(new File(srcDir, 'apple'), 'apple')
+
+        project.apply plugin: 'rpm'
+
+        project.task([type: Rpm], 'buildRpm', {
+            destinationDir = project.file('build/tmp/RpmPluginTest')
+            destinationDir.mkdirs()
+
+            packageName = 'scripts'
+            version = '1.0'
+            release = '1'
+            type = BINARY
+            arch = I386
+            os = LINUX
+
+            preInstall 'preInstalled'
+            postInstall 'postInstalled'
+            preUninstall 'preUninstalled'
+            postUninstall 'postUninstalled'
+            verify 'verified'
+
+            into '/opt/bleah'
+            from(srcDir)
+        })
+
+        when:
+        project.tasks.buildRpm.execute()
+
+        then:
+        def scan = Scanner.scan(project.file('build/tmp/RpmPluginTest/scripts-1.0-1.i386.rpm'))
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.PREINSCRIPT).endsWith('preInstalled\n')
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.PREINPROG) == '/bin/sh'
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.POSTINSCRIPT).endsWith('postInstalled\n')
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.POSTINPROG) == '/bin/sh'
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.PREUNSCRIPT).endsWith('preUninstalled\n')
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.PREUNPROG) == '/bin/sh'
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.POSTUNSCRIPT).endsWith('postUninstalled\n')
+        Scanner.getHeaderEntryString(scan, Header.HeaderTag.POSTUNPROG) == '/bin/sh'
+        Scanner.getHeaderEntryString(scan, RpmTag.VERIFYSCRIPT).endsWith('verified\n')
         Scanner.getHeaderEntryString(scan, RpmTag.VERIFYPROG) == '/bin/sh'
     }
 
@@ -171,7 +213,6 @@ class RpmPluginTest extends ProjectSpec {
         '2.2' == obsoleteVersions.values[1]
         GREATER == obsoleteComparisons.values[1]
     }
-
 
     def 'projectNameDefault'() {
         File srcDir = new File(projectDir, 'src')
